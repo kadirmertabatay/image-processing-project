@@ -121,8 +121,8 @@ FORMULA_DATA: dict[str, dict] = {
     "sobel": {
         "label": "Sobel Kenar Tespiti",
         "latex": [
-            r"$G_x = \begin{bmatrix}-1&0&+1\\-2&0&+2\\-1&0&+1\end{bmatrix} * I$",
-            r"$G_y = \begin{bmatrix}-1&-2&-1\\0&0&0\\+1&+2&+1\end{bmatrix} * I$",
+            r"$G_x = K_x * I$  (Yatay gradyan)",
+            r"$G_y = K_y * I$  (Dikey gradyan)",
             r"$M = \sqrt{G_x^2 + G_y^2}$",
         ],
         "kernel": "sobel_x",
@@ -131,7 +131,7 @@ FORMULA_DATA: dict[str, dict] = {
         "label": "Laplacian Kenar Tespiti",
         "latex": [
             r"$\nabla^2 I = \frac{\partial^2 I}{\partial x^2} + \frac{\partial^2 I}{\partial y^2}$",
-            r"$K = \begin{bmatrix}0&1&0\\1&-4&1\\0&1&0\end{bmatrix}$",
+            r"Kernel matrisi sağ panelde gösterilir.",
             r"$I' = K * I$",
         ],
         "kernel": "laplacian",
@@ -171,7 +171,8 @@ FORMULA_DATA: dict[str, dict] = {
     "thresh_binary": {
         "label": "Binary Eşikleme",
         "latex": [
-            r"$I'(x,y) = \begin{cases}255 & \text{if } I(x,y) > T \\ 0 & \text{otherwise}\end{cases}$",
+            r"$I'(x,y) = 255$  eğer  $I(x,y) > T$",
+            r"$I'(x,y) = 0$    aksi halde",
         ],
         "kernel": None,
     },

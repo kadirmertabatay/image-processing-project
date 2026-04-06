@@ -1,38 +1,42 @@
 """
 ui/widgets/control_panel.py — Tabbed parameter controls with tooltips.
+Modern glassmorphism design with gradient accents and polished sliders.
 """
 from __future__ import annotations
 
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSlider,
-    QCheckBox, QComboBox, QGroupBox, QTabWidget, QPushButton,
+    QCheckBox, QComboBox, QGroupBox, QTabWidget, QPushButton, QFrame,
 )
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from config import DEFAULTS, TOOLTIPS, THEME
 
 
-def _make_group(title: str) -> tuple[QGroupBox, QVBoxLayout]:
+# ─── Style helpers ───────────────────────────────────────────────────────────
+
+def _make_group(title: str, accent: str = THEME["lavender"]) -> tuple[QGroupBox, QVBoxLayout]:
     group = QGroupBox(title)
     group.setStyleSheet(f"""
         QGroupBox {{
-            color: {THEME['text']};
+            color: {accent};
             border: 1px solid {THEME['surface1']};
-            border-radius: 6px;
-            margin-top: 8px;
-            padding-top: 4px;
+            border-radius: 8px;
+            margin-top: 12px;
+            padding-top: 6px;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10px;
+            background: {THEME['crust']};
         }}
         QGroupBox::title {{
             subcontrol-origin: margin;
-            left: 8px;
-            padding: 0 4px;
+            left: 10px;
+            padding: 0 6px;
         }}
     """)
     layout = QVBoxLayout(group)
-    layout.setSpacing(4)
-    layout.setContentsMargins(8, 12, 8, 8)
+    layout.setSpacing(5)
+    layout.setContentsMargins(10, 14, 10, 8)
     return group, layout
 
 
@@ -44,43 +48,120 @@ def _styled_combo(items: list[str]) -> QComboBox:
             background: {THEME['surface0']};
             color: {THEME['text']};
             border: 1px solid {THEME['surface1']};
-            border-radius: 4px;
-            padding: 2px 6px;
+            border-radius: 6px;
+            padding: 4px 8px;
             font-size: 10px;
+            min-height: 22px;
         }}
-        QComboBox::drop-down {{ border: none; width: 16px; }}
+        QComboBox:hover {{
+            border-color: {THEME['mauve']};
+        }}
+        QComboBox::drop-down {{
+            border: none;
+            width: 18px;
+            subcontrol-origin: padding;
+            subcontrol-position: top right;
+        }}
         QComboBox QAbstractItemView {{
             background: {THEME['surface0']};
             color: {THEME['text']};
             selection-background-color: {THEME['accent']};
+            selection-color: white;
+            border: 1px solid {THEME['surface1']};
+            border-radius: 4px;
+            padding: 2px;
         }}
     """)
     return cb
 
 
 SLIDER_STYLE = f"""
+    QSlider {{
+        min-height: 20px;
+    }}
     QSlider::groove:horizontal {{
-        height: 4px;
+        height: 5px;
         background: {THEME['surface1']};
         border-radius: 2px;
     }}
     QSlider::handle:horizontal {{
-        background: {THEME['mauve']};
-        width: 12px;
-        height: 12px;
-        margin: -4px 0;
-        border-radius: 6px;
+        background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+            stop:0 {THEME['mauve']}, stop:1 {THEME['accent']});
+        width: 14px;
+        height: 14px;
+        margin: -5px 0;
+        border-radius: 7px;
+        border: 1px solid {THEME['accent']};
+    }}
+    QSlider::handle:horizontal:hover {{
+        background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+            stop:0 {THEME['pink']}, stop:1 {THEME['mauve']});
+        border-color: {THEME['mauve']};
     }}
     QSlider::sub-page:horizontal {{
-        background: {THEME['accent']};
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+            stop:0 {THEME['accent']}, stop:1 {THEME['mauve']});
         border-radius: 2px;
     }}
 """
 
-LABEL_STYLE   = f"color: {THEME['subtext']}; font-size: 10px; min-width: 90px;"
-VALUE_STYLE   = f"color: {THEME['mauve']}; font-size: 10px; min-width: 34px;"
-CHECK_STYLE   = f"color: {THEME['text']}; font-size: 10px;"
+LABEL_STYLE   = f"color: {THEME['subtext']}; font-size: 10px; min-width: 85px;"
+VALUE_STYLE   = f"color: {THEME['mauve']}; font-size: 10px; min-width: 32px; font-weight: bold;"
 
+CHECK_STYLE   = f"""
+    QCheckBox {{
+        color: {THEME['text']};
+        font-size: 10px;
+        spacing: 6px;
+    }}
+    QCheckBox::indicator {{
+        width: 16px;
+        height: 16px;
+        border: 1px solid {THEME['surface2']};
+        border-radius: 4px;
+        background: {THEME['surface0']};
+    }}
+    QCheckBox::indicator:hover {{
+        border-color: {THEME['mauve']};
+    }}
+    QCheckBox::indicator:checked {{
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+            stop:0 {THEME['accent']}, stop:1 {THEME['mauve']});
+        border-color: {THEME['mauve']};
+    }}
+"""
+
+TAB_STYLE = f"""
+    QTabWidget::pane {{
+        border: 1px solid {THEME['surface1']};
+        border-radius: 8px;
+        background: {THEME['mantle']};
+        top: -1px;
+    }}
+    QTabBar::tab {{
+        background: {THEME['surface0']};
+        color: {THEME['overlay0']};
+        border: 1px solid {THEME['surface1']};
+        border-bottom: none;
+        border-radius: 6px 6px 0 0;
+        padding: 5px 10px;
+        font-size: 9px;
+        margin-right: 1px;
+    }}
+    QTabBar::tab:hover {{
+        background: {THEME['surface1']};
+        color: {THEME['text']};
+    }}
+    QTabBar::tab:selected {{
+        background: {THEME['mantle']};
+        color: {THEME['mauve']};
+        font-weight: bold;
+        border-bottom: 2px solid {THEME['mauve']};
+    }}
+"""
+
+
+# ─── Control Panel ───────────────────────────────────────────────────────────
 
 class ControlPanel(QWidget):
     """
@@ -99,52 +180,35 @@ class ControlPanel(QWidget):
     def _build_ui(self):
         root = QVBoxLayout(self)
         root.setSpacing(6)
-        root.setContentsMargins(4, 4, 4, 4)
+        root.setContentsMargins(6, 6, 6, 6)
 
         tabs = QTabWidget()
-        tabs.setStyleSheet(f"""
-            QTabWidget::pane {{
-                border: 1px solid {THEME['surface1']};
-                border-radius: 6px;
-                background: {THEME['mantle']};
-            }}
-            QTabBar::tab {{
-                background: {THEME['surface0']};
-                color: {THEME['subtext']};
-                border: 1px solid {THEME['surface1']};
-                border-bottom: none;
-                border-radius: 4px 4px 0 0;
-                padding: 4px 8px;
-                font-size: 10px;
-                margin-right: 2px;
-            }}
-            QTabBar::tab:selected {{
-                background: {THEME['mantle']};
-                color: {THEME['mauve']};
-                font-weight: bold;
-            }}
-        """)
+        tabs.setStyleSheet(TAB_STYLE)
 
-        tabs.addTab(self._tab_basic(),     "Temel")
-        tabs.addTab(self._tab_color(),     "Renk")
-        tabs.addTab(self._tab_edge(),      "Kenar")
-        tabs.addTab(self._tab_morph(),     "Morfoloji")
-        tabs.addTab(self._tab_features(),  "Özellik")
+        tabs.addTab(self._tab_basic(),     "⚡ Temel")
+        tabs.addTab(self._tab_color(),     "🎨 Renk")
+        tabs.addTab(self._tab_edge(),      "📐 Kenar")
+        tabs.addTab(self._tab_morph(),     "🔲 Morfoloji")
+        tabs.addTab(self._tab_features(),  "👁 Özellik")
 
         root.addWidget(tabs)
 
         reset_btn = QPushButton("↺  Tüm Ayarları Sıfırla")
         reset_btn.setStyleSheet(f"""
             QPushButton {{
-                background: {THEME['surface1']};
-                color: {THEME['text']};
-                border: none;
-                border-radius: 6px;
-                padding: 7px;
+                background: {THEME['surface0']};
+                color: {THEME['subtext']};
+                border: 1px solid {THEME['surface1']};
+                border-radius: 8px;
+                padding: 8px;
                 font-size: 10px;
             }}
-            QPushButton:hover   {{ background: {THEME['surface2']}; }}
-            QPushButton:pressed {{ background: {THEME['surface0']}; }}
+            QPushButton:hover {{
+                background: {THEME['surface1']};
+                color: {THEME['red']};
+                border-color: {THEME['red']};
+            }}
+            QPushButton:pressed {{ background: {THEME['red']}; color: white; }}
         """)
         reset_btn.clicked.connect(self.reset_all)
         root.addWidget(reset_btn)
@@ -155,14 +219,14 @@ class ControlPanel(QWidget):
         w = QWidget()
         vbox = QVBoxLayout(w)
         vbox.setSpacing(6)
-        vbox.setContentsMargins(6, 6, 6, 6)
+        vbox.setContentsMargins(4, 6, 4, 4)
 
-        grp, lay = _make_group("Uzamsal Filtreler")
+        grp, lay = _make_group("Uzamsal Filtreler", THEME["sapphire"])
         self.blur_slider       = self._slider("Blur:", 0, 20, DEFAULTS["blur"], lay, "blur")
         self.sharpen_slider    = self._slider("Keskinlik:", 0, 20, DEFAULTS["sharpen"], lay, "sharpen")
         vbox.addWidget(grp)
 
-        grp2, lay2 = _make_group("Piksel Dönüşümleri")
+        grp2, lay2 = _make_group("Piksel Dönüşümleri", THEME["peach"])
         self.brightness_slider = self._slider("Parlaklık:", -100, 100, DEFAULTS["brightness"], lay2, "brightness")
         self.contrast_slider   = self._slider("Kontrast:", 50, 250, DEFAULTS["contrast"], lay2, "contrast")
 
@@ -194,15 +258,15 @@ class ControlPanel(QWidget):
         w = QWidget()
         vbox = QVBoxLayout(w)
         vbox.setSpacing(6)
-        vbox.setContentsMargins(6, 6, 6, 6)
+        vbox.setContentsMargins(4, 6, 4, 4)
 
-        grp, lay = _make_group("RGB Kanal Kazancı")
+        grp, lay = _make_group("RGB Kanal Kazancı", THEME["flamingo"])
         self.r_slider = self._slider("R Kanalı:", 0, 200, DEFAULTS["r_gain"], lay, "r_gain")
         self.g_slider = self._slider("G Kanalı:", 0, 200, DEFAULTS["g_gain"], lay, "g_gain")
         self.b_slider = self._slider("B Kanalı:", 0, 200, DEFAULTS["b_gain"], lay, "b_gain")
         vbox.addWidget(grp)
 
-        grp2, lay2 = _make_group("Renk Uzayı Görüntüleme")
+        grp2, lay2 = _make_group("Renk Uzayı Görüntüleme", THEME["teal"])
         row = QHBoxLayout()
         lbl = QLabel("Renk Uzayı:")
         lbl.setStyleSheet(LABEL_STYLE)
@@ -220,9 +284,9 @@ class ControlPanel(QWidget):
         w = QWidget()
         vbox = QVBoxLayout(w)
         vbox.setSpacing(6)
-        vbox.setContentsMargins(6, 6, 6, 6)
+        vbox.setContentsMargins(4, 6, 4, 4)
 
-        grp, lay = _make_group("Kenar Tespiti")
+        grp, lay = _make_group("Kenar Tespiti", THEME["green"])
         row = QHBoxLayout()
         lbl = QLabel("Yöntem:")
         lbl.setStyleSheet(LABEL_STYLE)
@@ -243,9 +307,9 @@ class ControlPanel(QWidget):
         w = QWidget()
         vbox = QVBoxLayout(w)
         vbox.setSpacing(6)
-        vbox.setContentsMargins(6, 6, 6, 6)
+        vbox.setContentsMargins(4, 6, 4, 4)
 
-        grp, lay = _make_group("Morfolojik İşlemler")
+        grp, lay = _make_group("Morfolojik İşlemler", THEME["mauve"])
         row = QHBoxLayout()
         lbl = QLabel("İşlem:")
         lbl.setStyleSheet(LABEL_STYLE)
@@ -255,11 +319,11 @@ class ControlPanel(QWidget):
         row.addWidget(self.morph_combo, 1)
         lay.addLayout(row)
 
-        self.morph_kernel_slider = self._slider("Kernel Boyutu:", 3, 21, DEFAULTS["morph_kernel"], lay, "morph_kernel")
+        self.morph_kernel_slider = self._slider("Kernel:", 3, 21, DEFAULTS["morph_kernel"], lay, "morph_kernel")
         self.morph_kernel_slider.setToolTip(TOOLTIPS.get("morph_kernel", ""))
         vbox.addWidget(grp)
 
-        grp2, lay2 = _make_group("Eşikleme")
+        grp2, lay2 = _make_group("Eşikleme", THEME["yellow"])
         row2 = QHBoxLayout()
         lbl2 = QLabel("Yöntem:")
         lbl2.setStyleSheet(LABEL_STYLE)
@@ -268,7 +332,7 @@ class ControlPanel(QWidget):
         row2.addWidget(self.thresh_combo, 1)
         lay2.addLayout(row2)
 
-        self.thresh_value_slider = self._slider("Eşik Değeri:", 0, 255, DEFAULTS["thresh_value"], lay2, "thresh_value")
+        self.thresh_value_slider = self._slider("Eşik:", 0, 255, DEFAULTS["thresh_value"], lay2, "thresh_value")
         self.thresh_value_slider.setToolTip(TOOLTIPS.get("thresh_value", ""))
         vbox.addWidget(grp2)
         vbox.addStretch()
@@ -280,9 +344,9 @@ class ControlPanel(QWidget):
         w = QWidget()
         vbox = QVBoxLayout(w)
         vbox.setSpacing(6)
-        vbox.setContentsMargins(6, 6, 6, 6)
+        vbox.setContentsMargins(4, 6, 4, 4)
 
-        grp, lay = _make_group("Özellik Tespiti")
+        grp, lay = _make_group("Özellik Tespiti", THEME["pink"])
         self.face_detect_cb = QCheckBox("Yüz Tespiti (Haar Cascade)")
         self.face_detect_cb.setStyleSheet(CHECK_STYLE)
         self.face_detect_cb.setToolTip(TOOLTIPS.get("face_detect", ""))
@@ -308,6 +372,7 @@ class ControlPanel(QWidget):
     def _slider(self, label: str, min_v: int, max_v: int, default: int,
                 layout: QVBoxLayout, tooltip_key: str = "") -> QSlider:
         row = QHBoxLayout()
+        row.setSpacing(6)
         lbl = QLabel(label)
         lbl.setStyleSheet(LABEL_STYLE)
         val_lbl = QLabel(str(default))
