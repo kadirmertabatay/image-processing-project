@@ -12,9 +12,9 @@ from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QFileDialog, QGroupBox, QScrollArea, QFrame,
     QTabWidget, QGridLayout, QSizePolicy, QTextEdit, QSplitter,
-    QGraphicsDropShadowEffect,
+    QGraphicsDropShadowEffect, QApplication,
 )
-from PyQt5.QtCore import Qt, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QFont, QColor
 
 from config import THEME
@@ -164,6 +164,16 @@ def _add_glow(widget: QWidget, color: str = THEME["accent"], radius: int = 20):
     shadow.setColor(QColor(color))
     shadow.setOffset(0, 2)
     widget.setGraphicsEffect(shadow)
+
+
+class ClickableImageLabel(QLabel):
+    """QLabel that emits normalized (0-1) click coordinates."""
+    pixel_clicked = pyqtSignal(float, float)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton and self.width() > 0 and self.height() > 0:
+            self.pixel_clicked.emit(event.x() / self.width(), event.y() / self.height())
+        super().mousePressEvent(event)
 
 
 # ─── Main Window ─────────────────────────────────────────────────────────────
@@ -394,6 +404,11 @@ class MainWindow(QMainWindow):
         save_btn.clicked.connect(self._save_image)
         lay.addWidget(save_btn)
 
+        copy_btn = QPushButton("⧉  Panoya Kopyala")
+        copy_btn.setStyleSheet(BTN_GHOST)
+        copy_btn.clicked.connect(self._copy_to_clipboard)
+        lay.addWidget(copy_btn)
+
         report_btn = QPushButton("↗  PDF Rapor Dışa Aktar")
         report_btn.setStyleSheet(BTN_GHOST)
         report_btn.clicked.connect(self._export_report)
@@ -497,7 +512,12 @@ class MainWindow(QMainWindow):
 
         vbox.addWidget(title_frame)
 
-        img_lbl = QLabel()
+        if key == "processed":
+            img_lbl = ClickableImageLabel()
+            img_lbl.pixel_clicked.connect(self._on_pixel_clicked)
+            img_lbl.setCursor(Qt.CrossCursor)
+        else:
+            img_lbl = QLabel()
         img_lbl.setAlignment(Qt.AlignCenter)
         img_lbl.setStyleSheet(f"""
             background: {THEME['crust']};
@@ -572,6 +592,10 @@ class MainWindow(QMainWindow):
             ("max",          "Max Piksel",   THEME["text"]),
             ("entropy",      "Entropi",      THEME["peach"]),
             ("snr",          "SNR",          THEME["peach"]),
+            ("px_r",         "Piksel R",     THEME["red"]),
+            ("px_g",         "Piksel G",     THEME["green"]),
+            ("px_b",         "Piksel B",     THEME["blue"]),
+            ("px_hex",       "Piksel Hex",   THEME["text"]),
         ]
         for row, (key, label, val_color) in enumerate(fields):
             lbl = QLabel(label + ":")
@@ -643,6 +667,34 @@ class MainWindow(QMainWindow):
             cv2.imwrite(path, self._last_result.frame)
             self._log.info(f"Kaydedildi: {path}")
             self._set_status(f"Kaydedildi ✓", THEME["green"])
+
+    def _copy_to_clipboard(self):
+        if self._last_result is None or self._last_result.frame is None:
+            self._set_status("Kopyalanacak görüntü yok.", THEME["yellow"])
+            return
+        frame = self._last_result.frame
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        h, w, ch = rgb.shape
+        qimg = QImage(rgb.tobytes(), w, h, ch * w, QImage.Format_RGB888)
+        QApplication.clipboard().setPixmap(QPixmap.fromImage(qimg))
+        self._log.info("İşlenmiş görüntü panoya kopyalandı.")
+        self._set_status("Panoya kopyalandı ✓", THEME["green"])
+
+    @pyqtSlot(float, float)
+    def _on_pixel_clicked(self, nx: float, ny: float):
+        if self._last_result is None or self._last_result.frame is None:
+            return
+        frame = self._last_result.frame
+        h, w = frame.shape[:2]
+        x = min(max(int(nx * w), 0), w - 1)
+        y = min(max(int(ny * h), 0), h - 1)
+        b, g, r = frame[y, x]
+        hex_val = f"#{int(r):02X}{int(g):02X}{int(b):02X}"
+        L = self._stats_labels
+        L["px_r"].setText(str(int(r)))
+        L["px_g"].setText(str(int(g)))
+        L["px_b"].setText(str(int(b)))
+        L["px_hex"].setText(hex_val)
 
     def _export_report(self):
         if self.current_frame is None:

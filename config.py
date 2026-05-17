@@ -57,6 +57,10 @@ DEFAULTS = {
     "color_space":    "BGR",    # BGR|HSV|LAB|YCrCb|GRAY
     "flip_h":         False,
     "flip_v":         False,
+    "rotation":       0,        # -180 to 180 derece
+    "invert":         False,
+    "sepia":          False,
+    "noise_amount":   0,        # 0-50 std dev
 }
 
 # ─── Tooltip strings ──────────────────────────────────────────────────────────

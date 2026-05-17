@@ -221,6 +221,8 @@ class ControlPanel(QWidget):
         grp, lay = _make_group("Uzamsal Filtreler", THEME["sapphire"])
         self.blur_slider       = self._slider("Blur:", 0, 20, DEFAULTS["blur"], lay, "blur")
         self.sharpen_slider    = self._slider("Keskinlik:", 0, 20, DEFAULTS["sharpen"], lay, "sharpen")
+        self.rotation_slider   = self._slider("Döndürme:", -180, 180, DEFAULTS["rotation"], lay, "rotation")
+        self.noise_slider      = self._slider("Gürültü:", 0, 50, DEFAULTS["noise_amount"], lay, "noise_amount")
         vbox.addWidget(grp)
 
         grp2, lay2 = _make_group("Piksel Dönüşümleri", THEME["peach"])
@@ -236,6 +238,10 @@ class ControlPanel(QWidget):
         self.grayscale_cb.setStyleSheet(CHECK_STYLE)
         self.grayscale_cb.setToolTip(TOOLTIPS.get("grayscale", ""))
         lay2.addWidget(self.grayscale_cb)
+
+        self.invert_cb = QCheckBox("Renk Ters Çevir (Negatif)")
+        self.invert_cb.setStyleSheet(CHECK_STYLE)
+        lay2.addWidget(self.invert_cb)
 
         flip_row = QHBoxLayout()
         self.flip_h_cb = QCheckBox("Yatay Çevir")
@@ -262,6 +268,12 @@ class ControlPanel(QWidget):
         self.g_slider = self._slider("G Kanalı:", 0, 200, DEFAULTS["g_gain"], lay, "g_gain")
         self.b_slider = self._slider("B Kanalı:", 0, 200, DEFAULTS["b_gain"], lay, "b_gain")
         vbox.addWidget(grp)
+
+        grp3, lay3 = _make_group("Renk Efektleri", THEME["peach"])
+        self.sepia_cb = QCheckBox("Sepya Tonu")
+        self.sepia_cb.setStyleSheet(CHECK_STYLE)
+        lay3.addWidget(self.sepia_cb)
+        vbox.addWidget(grp3)
 
         grp2, lay2 = _make_group("Renk Uzayı Görüntüleme", THEME["teal"])
         row = QHBoxLayout()
@@ -397,6 +409,7 @@ class ControlPanel(QWidget):
     def _connect_signals(self):
         sliders = [
             self.blur_slider, self.sharpen_slider,
+            self.rotation_slider, self.noise_slider,
             self.brightness_slider, self.contrast_slider,
             self.r_slider, self.g_slider, self.b_slider,
             self.canny_low_slider, self.canny_high_slider,
@@ -407,7 +420,7 @@ class ControlPanel(QWidget):
             sl.valueChanged.connect(self._emit)
 
         checkboxes = [
-            self.clahe_cb, self.grayscale_cb,
+            self.clahe_cb, self.grayscale_cb, self.invert_cb, self.sepia_cb,
             self.flip_h_cb, self.flip_v_cb,
             self.face_detect_cb, self.contour_detect_cb, self.hough_lines_cb,
         ]
@@ -450,6 +463,10 @@ class ControlPanel(QWidget):
             "color_space":    self.color_space_combo.currentText(),
             "flip_h":         self.flip_h_cb.isChecked(),
             "flip_v":         self.flip_v_cb.isChecked(),
+            "rotation":       self.rotation_slider.value(),
+            "invert":         self.invert_cb.isChecked(),
+            "sepia":          self.sepia_cb.isChecked(),
+            "noise_amount":   self.noise_slider.value(),
         })
 
     # ─── Reset ───────────────────────────────────────────────────────────────
@@ -479,3 +496,7 @@ class ControlPanel(QWidget):
         self.hough_lines_cb.setChecked(d["hough_lines"])
         self.hough_thresh_slider.setValue(d["hough_thresh"])
         self.color_space_combo.setCurrentIndex(0)
+        self.rotation_slider.setValue(d["rotation"])
+        self.noise_slider.setValue(d["noise_amount"])
+        self.invert_cb.setChecked(d["invert"])
+        self.sepia_cb.setChecked(d["sepia"])

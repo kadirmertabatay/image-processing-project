@@ -59,6 +59,10 @@ class ImageProcessor:
         self.color_space   = d["color_space"]
         self.flip_h        = d["flip_h"]
         self.flip_v        = d["flip_v"]
+        self.rotation      = d["rotation"]
+        self.invert        = d["invert"]
+        self.sepia         = d["sepia"]
+        self.noise_amount  = d["noise_amount"]
 
     def update_params(self, params: dict):
         """Apply a partial params dict (from UI signal)."""
@@ -76,6 +80,13 @@ class ImageProcessor:
         active_ops: list[str] = []
         formula_key = "identity"
         kernel_arr: Optional[np.ndarray] = None
+
+        # 0. Rotation
+        if self.rotation != 0:
+            h, w = img.shape[:2]
+            M = cv2.getRotationMatrix2D((w / 2, h / 2), self.rotation, 1.0)
+            img = cv2.warpAffine(img, M, (w, h))
+            active_ops.append(f"Döndürme ({self.rotation}°)")
 
         # 1. Grayscale
         if self.grayscale:
@@ -191,7 +202,26 @@ class ImageProcessor:
             img = self._convert_color_space(img, self.color_space)
             active_ops.append(f"Renk Uzayı: {self.color_space}")
 
-        # 12. Flip
+        # 12. Invert
+        if self.invert:
+            img = cv2.bitwise_not(img)
+            active_ops.append("Renk Ters Çevirme")
+
+        # 13. Sepia
+        if self.sepia:
+            sepia_kernel = np.array([[0.272, 0.534, 0.131],
+                                     [0.349, 0.686, 0.168],
+                                     [0.393, 0.769, 0.189]], dtype=np.float32)
+            img = np.clip(cv2.transform(img, sepia_kernel), 0, 255).astype(np.uint8)
+            active_ops.append("Sepya Tonu")
+
+        # 14. Gaussian Noise
+        if self.noise_amount > 0:
+            noise = np.random.normal(0, self.noise_amount, img.shape)
+            img = np.clip(img.astype(np.float32) + noise, 0, 255).astype(np.uint8)
+            active_ops.append(f"Gürültü (σ={self.noise_amount})")
+
+        # 15. Flip
         if self.flip_h:
             img = cv2.flip(img, 1)
         if self.flip_v:
