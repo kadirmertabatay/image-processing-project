@@ -29,7 +29,7 @@ THEME = {
     "pink":    "#f5c2e7",
     "flamingo":"#f2cdcd",
     "rosewater":"#f5e0dc",
-    "accent":  "#7c3aed",
+    "accent":  "#5b73e8",
 }
 
 # ─── Processing defaults ──────────────────────────────────────────────────────

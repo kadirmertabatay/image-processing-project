@@ -87,22 +87,21 @@ TAB_STYLE = f"""
 
 BTN_PRIMARY = f"""
     QPushButton {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 {THEME['accent']}, stop:1 {THEME['mauve']});
+        background: {THEME['accent']};
         color: white;
         border: none;
-        border-radius: 8px;
-        padding: 9px 12px;
+        border-radius: 6px;
+        padding: 9px 14px;
         font-size: 11px;
-        font-weight: bold;
+        font-weight: 600;
         text-align: left;
     }}
     QPushButton:hover {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 {THEME['mauve']}, stop:1 {THEME['pink']});
+        background: {THEME['mauve']};
     }}
     QPushButton:pressed {{
-        background: {THEME['accent']};
+        background: {THEME['surface2']};
+        color: {THEME['text']};
     }}
 """
 
@@ -111,19 +110,18 @@ BTN_SECONDARY = f"""
         background: {THEME['surface0']};
         color: {THEME['text']};
         border: 1px solid {THEME['surface1']};
-        border-radius: 8px;
-        padding: 8px 12px;
+        border-radius: 6px;
+        padding: 8px 14px;
         font-size: 10px;
         text-align: left;
     }}
     QPushButton:hover {{
         background: {THEME['surface1']};
-        border-color: {THEME['mauve']};
-        color: {THEME['lavender']};
+        border-color: {THEME['overlay0']};
+        color: {THEME['text']};
     }}
     QPushButton:pressed {{
-        background: {THEME['accent']};
-        color: white;
+        background: {THEME['surface2']};
     }}
 """
 
@@ -131,16 +129,16 @@ BTN_GHOST = f"""
     QPushButton {{
         background: transparent;
         color: {THEME['subtext']};
-        border: 1px solid {THEME['surface1']};
-        border-radius: 8px;
-        padding: 8px 12px;
+        border: 1px solid {THEME['surface0']};
+        border-radius: 6px;
+        padding: 8px 14px;
         font-size: 10px;
         text-align: left;
     }}
     QPushButton:hover {{
         background: {THEME['surface0']};
-        border-color: {THEME['teal']};
-        color: {THEME['teal']};
+        border-color: {THEME['surface1']};
+        color: {THEME['text']};
     }}
     QPushButton:pressed {{
         background: {THEME['surface1']};
@@ -246,21 +244,22 @@ class MainWindow(QMainWindow):
         hlay.setContentsMargins(16, 0, 16, 0)
 
         # Logo / title
-        logo = QLabel("◉")
+        logo = QLabel("▣")
         logo.setStyleSheet(f"""
-            color: {THEME['mauve']};
-            font-size: 22px;
+            color: {THEME['sapphire']};
+            font-size: 18px;
             font-weight: bold;
-            padding-right: 6px;
+            padding-right: 8px;
+            letter-spacing: 0px;
         """)
         hlay.addWidget(logo)
 
         title = QLabel("Görüntü İşleme Laboratuvarı")
         title.setStyleSheet(f"""
             color: {THEME['text']};
-            font-size: 15px;
+            font-size: 14px;
             font-weight: bold;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         """)
         hlay.addWidget(title)
 
@@ -335,8 +334,8 @@ class MainWindow(QMainWindow):
         log_lay.setContentsMargins(8, 8, 8, 8)
         log_lay.setSpacing(4)
 
-        log_title = QLabel("📋  İşlem Günlüğü")
-        log_title.setStyleSheet(f"color: {THEME['lavender']}; font-weight: bold; font-size: 10px; border: none;")
+        log_title = QLabel("İşlem Günlüğü")
+        log_title.setStyleSheet(f"color: {THEME['subtext']}; font-weight: 600; font-size: 10px; border: none; text-transform: uppercase; letter-spacing: 1px;")
         log_lay.addWidget(log_title)
 
         self._log_widget = QTextEdit()
@@ -364,22 +363,22 @@ class MainWindow(QMainWindow):
         lay.setSpacing(6)
         lay.setContentsMargins(10, 10, 10, 10)
 
-        src_title = QLabel("🎯  Giriş Kaynağı")
-        src_title.setStyleSheet(f"color: {THEME['lavender']}; font-weight: bold; font-size: 11px; border: none;")
+        src_title = QLabel("Giriş Kaynağı")
+        src_title.setStyleSheet(f"color: {THEME['subtext']}; font-weight: 600; font-size: 10px; border: none; text-transform: uppercase; letter-spacing: 1px;")
         lay.addWidget(src_title)
 
         # Webcam button — primary style
-        self._webcam_btn = QPushButton("📷  Webcam Başlat / Durdur")
+        self._webcam_btn = QPushButton("▶  Webcam Başlat / Durdur")
         self._webcam_btn.setStyleSheet(BTN_PRIMARY)
         self._webcam_btn.clicked.connect(self._toggle_webcam)
         lay.addWidget(self._webcam_btn)
 
-        img_btn = QPushButton("🖼  Fotoğraf Yükle...")
+        img_btn = QPushButton("▲  Fotoğraf Yükle...")
         img_btn.setStyleSheet(BTN_SECONDARY)
         img_btn.clicked.connect(self._load_image)
         lay.addWidget(img_btn)
 
-        vid_btn = QPushButton("🎞  Video Yükle...")
+        vid_btn = QPushButton("▷  Video Yükle...")
         vid_btn.setStyleSheet(BTN_SECONDARY)
         vid_btn.clicked.connect(self._load_video)
         lay.addWidget(vid_btn)
@@ -390,34 +389,33 @@ class MainWindow(QMainWindow):
         sep.setStyleSheet(f"border: none; border-top: 1px solid {THEME['surface1']}; margin: 2px 0;")
         lay.addWidget(sep)
 
-        save_btn = QPushButton("💾  Görüntüyü Kaydet")
+        save_btn = QPushButton("↓  Görüntüyü Kaydet")
         save_btn.setStyleSheet(BTN_GHOST)
         save_btn.clicked.connect(self._save_image)
         lay.addWidget(save_btn)
 
-        report_btn = QPushButton("📄  PDF Rapor Dışa Aktar")
+        report_btn = QPushButton("↗  PDF Rapor Dışa Aktar")
         report_btn.setStyleSheet(BTN_GHOST)
         report_btn.clicked.connect(self._export_report)
         lay.addWidget(report_btn)
 
-        analyse_btn = QPushButton("🔬  Derin Analiz Çalıştır")
+        analyse_btn = QPushButton("◈  Derin Analiz Çalıştır")
         analyse_btn.setStyleSheet(f"""
             QPushButton {{
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 {THEME['teal']}, stop:1 {THEME['sapphire']});
+                background: {THEME['teal']};
                 color: {THEME['crust']};
                 border: none;
-                border-radius: 8px;
-                padding: 9px 12px;
+                border-radius: 6px;
+                padding: 9px 14px;
                 font-size: 10px;
-                font-weight: bold;
+                font-weight: 600;
                 text-align: left;
             }}
             QPushButton:hover {{
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 {THEME['green']}, stop:1 {THEME['teal']});
+                background: {THEME['sapphire']};
+                color: {THEME['crust']};
             }}
-            QPushButton:pressed {{ background: {THEME['teal']}; }}
+            QPushButton:pressed {{ background: {THEME['surface2']}; color: {THEME['text']}; }}
         """)
         analyse_btn.setToolTip("3-D yüzey, FFT ve detaylı istatistikler hesaplanır (arka plan)")
         analyse_btn.clicked.connect(self._run_deep_analysis)
@@ -453,10 +451,10 @@ class MainWindow(QMainWindow):
         self._fft_widget       = FFTWidget()
         self._colorspace_widget= ColorSpaceWidget()
 
-        self._analysis_tabs.addTab(self._histogram_widget,  "📊  Histogram")
-        self._analysis_tabs.addTab(self._surface3d_widget,  "🏔  3-D Yüzey")
-        self._analysis_tabs.addTab(self._fft_widget,        "🌊  FFT Spektrum")
-        self._analysis_tabs.addTab(self._colorspace_widget, "🎨  Renk Uzayı")
+        self._analysis_tabs.addTab(self._histogram_widget,  "Histogram")
+        self._analysis_tabs.addTab(self._surface3d_widget,  "3-D Yüzey")
+        self._analysis_tabs.addTab(self._fft_widget,        "FFT Spektrum")
+        self._analysis_tabs.addTab(self._colorspace_widget, "Renk Uzayı")
         self._analysis_tabs.currentChanged.connect(self._on_tab_changed)
 
         vbox.addWidget(self._analysis_tabs, stretch=2)
@@ -542,15 +540,15 @@ class MainWindow(QMainWindow):
         stats_header.setStyleSheet(f"""
             QFrame {{
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 {THEME['yellow']}33, stop:1 transparent);
+                    stop:0 {THEME['sapphire']}22, stop:1 transparent);
                 border-radius: 6px;
                 border: none;
             }}
         """)
         shlay = QHBoxLayout(stats_header)
         shlay.setContentsMargins(8, 4, 8, 4)
-        stitle = QLabel("📐  Görüntü İstatistikleri")
-        stitle.setStyleSheet(f"color: {THEME['yellow']}; font-weight: bold; font-size: 11px; border: none;")
+        stitle = QLabel("Görüntü İstatistikleri")
+        stitle.setStyleSheet(f"color: {THEME['sapphire']}; font-weight: bold; font-size: 11px; border: none;")
         shlay.addWidget(stitle)
         stats_lay.addWidget(stats_header)
 

@@ -80,27 +80,24 @@ SLIDER_STYLE = f"""
         min-height: 20px;
     }}
     QSlider::groove:horizontal {{
-        height: 5px;
+        height: 4px;
         background: {THEME['surface1']};
         border-radius: 2px;
     }}
     QSlider::handle:horizontal {{
-        background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-            stop:0 {THEME['mauve']}, stop:1 {THEME['accent']});
-        width: 14px;
-        height: 14px;
-        margin: -5px 0;
-        border-radius: 7px;
-        border: 1px solid {THEME['accent']};
+        background: {THEME['text']};
+        width: 12px;
+        height: 12px;
+        margin: -4px 0;
+        border-radius: 6px;
+        border: 2px solid {THEME['accent']};
     }}
     QSlider::handle:horizontal:hover {{
-        background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-            stop:0 {THEME['pink']}, stop:1 {THEME['mauve']});
+        background: {THEME['lavender']};
         border-color: {THEME['mauve']};
     }}
     QSlider::sub-page:horizontal {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 {THEME['accent']}, stop:1 {THEME['mauve']});
+        background: {THEME['accent']};
         border-radius: 2px;
     }}
 """
@@ -185,15 +182,15 @@ class ControlPanel(QWidget):
         tabs = QTabWidget()
         tabs.setStyleSheet(TAB_STYLE)
 
-        tabs.addTab(self._tab_basic(),     "⚡ Temel")
-        tabs.addTab(self._tab_color(),     "🎨 Renk")
-        tabs.addTab(self._tab_edge(),      "📐 Kenar")
-        tabs.addTab(self._tab_morph(),     "🔲 Morfoloji")
-        tabs.addTab(self._tab_features(),  "👁 Özellik")
+        tabs.addTab(self._tab_basic(),     "Temel")
+        tabs.addTab(self._tab_color(),     "Renk")
+        tabs.addTab(self._tab_edge(),      "Kenar")
+        tabs.addTab(self._tab_morph(),     "Morfoloji")
+        tabs.addTab(self._tab_features(),  "Özellik")
 
         root.addWidget(tabs)
 
-        reset_btn = QPushButton("↺  Tüm Ayarları Sıfırla")
+        reset_btn = QPushButton("Tüm Ayarları Sıfırla")
         reset_btn.setStyleSheet(f"""
             QPushButton {{
                 background: {THEME['surface0']};

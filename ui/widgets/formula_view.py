@@ -42,18 +42,18 @@ class FormulaView(QWidget):
         header_frame = QFrame()
         header_frame.setStyleSheet(f"""
             QFrame {{
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 {THEME['accent']}, stop:1 {THEME['mauve']});
-                border-radius: 8px;
+                background: {THEME['surface0']};
+                border: 1px solid {THEME['surface1']};
+                border-radius: 6px;
                 padding: 0;
             }}
         """)
         hlay = QVBoxLayout(header_frame)
         hlay.setContentsMargins(10, 6, 10, 6)
-        header = QLabel("✦  Matematiksel Model")
+        header = QLabel("Matematiksel Model")
         header.setAlignment(Qt.AlignCenter)
         header.setStyleSheet(
-            f"color: white; font-weight: bold; font-size: 12px; background: transparent;"
+            f"color: {THEME['subtext']}; font-weight: 600; font-size: 10px; background: transparent; letter-spacing: 1px;"
         )
         hlay.addWidget(header)
         root.addWidget(header_frame)
